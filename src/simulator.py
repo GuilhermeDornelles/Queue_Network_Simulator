@@ -4,20 +4,21 @@ from enum_ import EventType
 from event import Event
 
 class Simulator:
-    def __init__(self, queues: list[SimpleQueue], random_numbers : list, time_first_event : int) -> None:
+    def __init__(self, queues: list[SimpleQueue], random_numbers : list, first_event : Event) -> None:
         self.queues            : list[SimpleQueue] = queues
         self.scheduler         : Scheduler         = Scheduler()
         
         for i in range(len(self.queues)):
             q = self.queues[i]
             q.random_interval = self.random_interval
+            q.next_random     = self.get_next_random_number
             q.scheduler = self.scheduler
 
         self.random_numbers    : list              = random_numbers
         self.last_random_index : int               = 0
         self.time_last_event   : float             = 0
         self.time              : float             = 0
-        self.scheduler.add_event(Event(EventType.ARRIVE, time_first_event))
+        self.scheduler.add_event(first_event)
     
     def simulate(self):
         self.running = True
@@ -34,24 +35,32 @@ class Simulator:
                 self.__acummulate_time_to_queues(self.time)
 
                 if event.type == EventType.ARRIVE:
-                    self.queues[0].arrive(self.time, self.queues[1])
-                elif event.type == EventType.LEAVE:
-                    self.queues[1].leave(self.time)
+                    event.dest_queue.arrive(self.time)
                 else:
-                    self.queues[0].pass_to_queue(self.time, event.dest_queue)
+                    event.source_queue.pass_to(self.time_last_event)
             else:
                 self.running = False
     
     def __acummulate_time_to_queues(self, delta_time : float):
         for q in self.queues:
-            q.acummulate_time(delta_time=delta_time)
+            if q.name != 'EXIT':
+                q.acummulate_time(delta_time=delta_time)
     
     def __all_random_used(self) -> bool:
         return self.last_random_index >= len(self.random_numbers)
     
-    def random_interval(self, a : int, b : int) -> float:
+    def get_next_random_number(self):
         if self.last_random_index < len(self.random_numbers):
             random_number = self.random_numbers[self.last_random_index]
+            self.last_random_index += 1
+            return random_number
+
+        self.running = False
+        return -1
+    
+    def random_interval(self, a : int, b : int) -> float:
+        random_number = self.get_next_random_number()
+        if random_number > 0:
             self.last_random_index += 1
             return a + ((b-a)*random_number)
         else:
@@ -65,7 +74,8 @@ class Simulator:
         res += f"\nqueues\n[\n"
         
         for q in self.queues:
-            res += f"{q};\n"
+            if q.name != 'EXIT':
+                res += f"{q};\n"
         
         res += f"]\n"
         

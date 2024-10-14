@@ -1,22 +1,31 @@
 {
     "total_random_numbers": 100000,
-    "time_first_event": 1.5,
+    "time_first_event": 2,
     "queues": [
         {
             "name": "Q1",
-            "servers": 2,
-            "capacity": 3,
-            "min_service": 3,
-            "max_service": 4,
-            "min_arrival": 1,
+            "servers": 1,
+            "capacity": -1,
+            "min_service": 1,
+            "max_service": 2,
+            "min_arrival": 2,
             "max_arrival": 4
         },
         {
             "name": "Q2",
-            "servers": 1,
+            "servers": 2,
             "capacity": 5,
-            "min_service": 2,
-            "max_service": 3,
+            "min_service": 4,
+            "max_service": 8,
+            "min_arrival": 0,
+            "max_arrival": 0
+        },
+        {
+            "name": "Q3",
+            "servers":  2,
+            "capacity": 10,
+            "min_service": 5,
+            "max_service": 15,
             "min_arrival": 0,
             "max_arrival": 0
         }
@@ -25,7 +34,37 @@
         {
             "source": "Q1",
             "target": "Q2",
-            "probability1": 0.2
+            "probability": 0.8
+        },
+        {
+            "source": "Q1",
+            "target": "Q3",
+            "probability": 0.2
+        },
+        {
+            "source": "Q2",
+            "target": "Q2",
+            "probability": 0.5
+        },
+        {
+            "source": "Q2",
+            "target": "EXIT",
+            "probability": 0.2
+        },
+        {
+            "source": "Q2",
+            "target": "Q1",
+            "probability": 0.3
+        },
+        {
+            "source": "Q3",
+            "target": "Q3",
+            "probability": 0.7
+        },
+        {
+            "source": "Q3",
+            "target": "EXIT",
+            "probability": 0.3
         }
     ]
 }
